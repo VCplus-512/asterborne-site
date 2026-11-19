@@ -9,3 +9,7 @@ header { position: fixed; background-color: rgb(22 19 35 / 85%); }
 @media (prefers-reduced-motion: reduce) {
   .hero { position: relative; filter: none; }
 }
+#article figure { margin: 1.5rem 0 .5rem; }
+#article figure img { background: #666571; border-radius: 2px; }
+#article figure a { display: block; }
+#article figcaption { margin-top: .55rem; color: #d3c7be; font-size: .88rem; }
