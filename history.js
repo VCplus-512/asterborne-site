@@ -82,22 +82,16 @@ function noteDetails(note) {
   const heading = document.createElement("summary");
   const date = textElement("time", note.date.slice(5).replace("-", "."));
   date.dateTime = note.date;
-  heading.append(date, textElement("strong", note.title), textElement("small", note.tags.join(" / ")));
+  heading.append(date, renderNoteTitle(document.createElement("strong"), note), textElement("small", note.tags.join(" / ")));
   item.append(heading);
   for (const paragraph of note.body) item.append(textElement("p", paragraph));
-  if (note.image) {
-    const figure = document.createElement("figure");
-    const link = document.createElement("a");
-    link.href = "media/" + note.image;
-    link.target = "_blank";
-    link.rel = "noopener";
-    const image = new Image();
-    image.alt = note.caption;
-    image.loading = "lazy";
-    item.addEventListener("toggle", () => { if (item.open && !image.hasAttribute("src")) image.src = link.href; });
-    link.append(image);
-    figure.append(link, textElement("figcaption", note.caption));
-    item.append(figure);
+  if (noteFigures(note).length) {
+    function showFigures() {
+      if (!item.open) return;
+      appendNoteFigures(item, note);
+      item.removeEventListener("toggle", showFigures);
+    }
+    item.addEventListener("toggle", showFigures);
   }
   return item;
 }

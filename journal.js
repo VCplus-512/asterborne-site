@@ -12,11 +12,11 @@ function render(){
   $("listTitle").textContent=active==="全部"?"全部进度":active+"进度";
   const rows=notes.filter(n=>active==="全部"||n.tags.includes(active)).sort((a,b)=> $("order").value==="new"?b.date.localeCompare(a.date):a.date.localeCompare(b.date));
   $("entries").replaceChildren();
-  rows.forEach(n=>{const b=document.createElement("button");b.className="entry";const t=document.createElement("time");t.dateTime=n.date;t.textContent=n.date.replaceAll("-",".");const desc=document.createElement("span");const title=document.createElement("b");title.textContent=n.title;const tags=document.createElement("small");tags.textContent=n.tags.join("　/　");desc.append(title,tags);const plus=document.createElement("i");plus.textContent="＋";plus.setAttribute("aria-hidden","true");b.append(t,desc,plus);b.onclick=()=>openNote(n);$("entries").append(b)});
+  rows.forEach(n=>{const b=document.createElement("button");b.className="entry";const t=document.createElement("time");t.dateTime=n.date;t.textContent=n.date.replaceAll("-",".");const desc=document.createElement("span");const title=document.createElement("b");renderNoteTitle(title,n);const tags=document.createElement("small");tags.textContent=n.tags.join("　/　");desc.append(title,tags);const plus=document.createElement("i");plus.textContent="＋";plus.setAttribute("aria-hidden","true");b.append(t,desc,plus);b.onclick=()=>openNote(n);$("entries").append(b)});
 }
 function openNote(note) {
   $("articleMeta").textContent = note.date + "　/　" + note.tags.join(" · ");
-  $("articleTitle").textContent = note.title;
+  renderNoteTitle($("articleTitle"), note);
   const body = $("articleBody");
   body.replaceChildren();
   for (const line of note.body) {
@@ -24,26 +24,15 @@ function openNote(note) {
     paragraph.textContent = line;
     body.append(paragraph);
   }
-  if (note.image) {
-    const figure = document.createElement("figure");
-    const image = document.createElement("img");
-    image.src = "media/" + note.image;
-    image.alt = note.caption;
-    const link = document.createElement("a");
-    link.href = image.src;
-    link.target = "_blank";
-    link.rel = "noopener";
-    link.title = "打开大图";
-    link.append(image);
-    const caption = document.createElement("figcaption");
-    caption.textContent = note.caption;
-    figure.append(link, caption);
-    body.append(figure);
-  }
+  appendNoteFigures(body, note);
   $("article").showModal();
   $("article").scrollTop = 0;
 }
-$("order").onchange=render;$("readDoor").onclick=()=>openNote(notes.find(n=>n.image==="door.png"));render();
+$("order").onchange=render;
+const featuredNote = notes.find(n => n.title === "基地门框的竖缝");
+renderNoteTitle($("featuredTitle"), featuredNote);
+$("readDoor").onclick = () => openNote(featuredNote);
+render();
 const sea=$("sea"),film=$("cinema").querySelector("video");
 const updateMotion=()=>{$("motion").textContent=sea.paused?"播放背景":"暂停背景"};sea.onplay=updateMotion;sea.onpause=updateMotion;
 if(!matchMedia("(prefers-reduced-motion: reduce)").matches)sea.play().catch(updateMotion);
