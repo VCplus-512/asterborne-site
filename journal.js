@@ -148,9 +148,21 @@ function startJournalDeck(deck, entries) {
     moving = true;
     paintClock(0);
     try {
-      while (visible[0].el !== target) await rotate();
+      const doubleFlight = visible[2]?.el === target;
+      deck.classList.toggle("chain-flight", doubleFlight);
+      const firstFlight = rotate();
+      if (doubleFlight) {
+        const duration = Number(getComputedStyle(deck).getPropertyValue("--flight-ms"));
+        if (!matchMedia("(prefers-reduced-motion: reduce)").matches) {
+          await new Promise(resolve => setTimeout(resolve, duration / 2));
+        }
+        await Promise.all([firstFlight, rotate()]);
+      } else {
+        await firstFlight;
+      }
       if (restoreFocus) target.querySelector("button:not(.select-card)").focus({preventScroll:true});
     } finally {
+      deck.classList.remove("chain-flight");
       elapsed = 0;
       previous = performance.now();
       paintClock(period);
