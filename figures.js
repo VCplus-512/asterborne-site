@@ -35,3 +35,20 @@ function appendNoteFigures(container, note) {
     container.append(figure);
   }
 }
+
+function appendStory(container, story) {
+  let attempt;
+  for (const [key, label] of [["goal", "问题与目标"], ["attempt", "解决途径与尝试"], ["result", "结果与取舍"]]) {
+    const section = document.createElement("div");
+    section.className = "story-part";
+    const heading = document.createElement("strong");
+    heading.className = "story-label";
+    heading.textContent = label;
+    const paragraph = document.createElement("p");
+    paragraph.textContent = story[key];
+    section.append(heading, paragraph);
+    container.append(section);
+    if (key === "attempt") attempt = section;
+  }
+  return attempt;
+}

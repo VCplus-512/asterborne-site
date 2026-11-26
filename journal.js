@@ -19,12 +19,8 @@ function openNote(note) {
   renderNoteTitle($("articleTitle"), note);
   const body = $("articleBody");
   body.replaceChildren();
-  for (const line of note.body) {
-    const paragraph = document.createElement("p");
-    paragraph.textContent = line;
-    body.append(paragraph);
-  }
-  appendNoteFigures(body, note);
+  const attempt = appendStory(body, note.story);
+  appendNoteFigures(attempt, note);
   $("article").showModal();
   $("article").scrollTop = 0;
 }

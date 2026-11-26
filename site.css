@@ -16,3 +16,7 @@ header { position: fixed; background-color: rgb(22 19 35 / 85%); }
 
 .note-image-icon { display: inline-block; width: .92em; height: .92em; margin-inline-start: .35em; vertical-align: -.06em; color: var(--accent); }
 .note-image-icon svg { display: block; width: 100%; height: 100%; }
+
+.story-part { margin: 1.1rem 0; }
+.story-label { display: block; font-size: .83rem; letter-spacing: .08em; color: #e6cbb2; }
+.story-part > p { margin: .32rem 0 .65rem; }
