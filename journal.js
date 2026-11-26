@@ -85,12 +85,26 @@ function startJournalDeck(deck, entries) {
     select.className = "select-card";
     select.type = "button";
     select.onclick = () => advanceTo(el, select.matches(":focus-visible"));
+    function peek(event) {
+      const slot = Number(el.dataset.slot);
+      if (event.pointerType !== "mouse" || moving || !(slot === 1 || slot === 2)) return;
+      // Measure from the resting stack so the sliding edge cannot change its own direction.
+      const box = deck.getBoundingClientRect();
+      const step = parseFloat(getComputedStyle(deck).getPropertyValue("--step"));
+      const top = event.clientY < box.top - (slot - 1) * step;
+      const right = event.clientX >= box.right + (slot - 1) * step;
+      el.dataset.peek = top && right ? "corner" : right ? "right" : "top";
+    }
+    select.onpointerenter = peek;
+    select.onpointermove = peek;
+    select.onpointerleave = () => { delete el.dataset.peek; };
     el.append(select);
     deck.append(el);
     return {note, el, select};
   }
   function positionCards() {
     visible.forEach(({el, select, note}, index) => {
+      delete el.dataset.peek;
       el.dataset.slot = index;
       el.inert = false;
       select.hidden = index === 0;
