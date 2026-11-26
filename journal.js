@@ -50,7 +50,21 @@ function startJournalDeck(deck, entries) {
       frame.className = "featureImg";
       const img = new Image();
       img.alt = figure.caption;
-      img.src = "media/" + figure.image;
+      const url = new URL("media/" + figure.image, document.baseURI);
+      img.style.visibility = "hidden";
+      img.onload = () => { img.style.visibility = ""; };
+      let retried = false;
+      img.onerror = () => {
+        if (!retried) {
+          retried = true;
+          url.searchParams.set("retry", "1");
+          img.src = url.href;
+          return;
+        }
+        frame.remove();
+        el.classList.add("text-only");
+      };
+      img.src = url.href;
       frame.append(img);
       el.append(frame);
     } else {
