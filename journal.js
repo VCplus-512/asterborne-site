@@ -81,19 +81,26 @@ function startJournalDeck(deck, entries) {
     read.onclick = () => openNote(note);
     copy.append(meta, title, excerpt, read);
     el.append(copy);
+    const select = document.createElement("button");
+    select.className = "select-card";
+    select.type = "button";
+    select.onclick = () => advanceTo(el, select.matches(":focus-visible"));
+    el.append(select);
     deck.append(el);
-    return {note, el};
+    return {note, el, select};
   }
   function positionCards() {
-    visible.forEach(({el}, index) => {
+    visible.forEach(({el, select, note}, index) => {
       el.dataset.slot = index;
-      el.inert = index !== 0;
+      el.inert = false;
+      select.hidden = index === 0;
+      select.setAttribute("aria-label", "切换到第" + (index + 1) + "张日志：" + note.title);
     });
   }
   while (visible.length < Math.min(3, entries.length)) visible.push(createCard(draw()));
   positionCards();
   if (entries.length < 2) return;
-  function rotate() {
+  async function rotate() {
     const next = draw();
     const leaving = visible.shift().el;
     leaving.inert = true;
@@ -104,7 +111,8 @@ function startJournalDeck(deck, entries) {
     visible.push(incoming);
     incoming.el.getBoundingClientRect();
     positionCards();
-    window.setTimeout(() => leaving.remove(), 850);
+    await Promise.allSettled(leaving.getAnimations().map(animation => animation.finished));
+    leaving.remove();
   }
   const clock = deck.querySelector(".deck-clock");
   const ring = clock.querySelector(".clock-ring");
@@ -112,26 +120,38 @@ function startJournalDeck(deck, entries) {
   const period = 20000;
   let elapsed = 0;
   let previous = performance.now();
-  let transitioning = false;
+  let moving = false;
   clock.removeAttribute("hidden");
+
+  function paintClock(remaining) {
+    const seconds = String(Math.ceil(remaining / 1000));
+    if (digits.textContent !== seconds) digits.textContent = seconds;
+    ring.style.strokeDashoffset = String(100 * (1 - remaining / period));
+  }
+
+  async function advanceTo(target, restoreFocus = false) {
+    if (moving || !visible.some(card => card.el === target)) return;
+    moving = true;
+    paintClock(0);
+    try {
+      while (visible[0].el !== target) await rotate();
+      if (restoreFocus) target.querySelector("button:not(.select-card)").focus({preventScroll:true});
+    } finally {
+      elapsed = 0;
+      previous = performance.now();
+      paintClock(period);
+      moving = false;
+    }
+  }
 
   function tick() {
     const now = performance.now();
     const delta = now - previous;
     previous = now;
-    if (document.hidden || document.querySelector("dialog[open]") || deck.querySelector(":focus-visible")) return;
+    if (moving || document.hidden || document.querySelector("dialog[open]") || deck.querySelector(":focus-visible")) return;
     elapsed += delta;
-    if (elapsed >= period) {
-      elapsed %= period;
-      rotate();
-      transitioning = true;
-    }
-    if (elapsed >= 720) transitioning = false;
-    const remaining = transitioning ? 0 : period - elapsed;
-    // The incoming card starts at 20 after the outgoing card has faded.
-    const seconds = transitioning ? 0 : Math.ceil(remaining / 1000);
-    if (digits.textContent !== String(seconds)) digits.textContent = String(seconds);
-    ring.style.strokeDashoffset = String(100 * (1 - remaining / period));
+    if (elapsed >= period) advanceTo(visible[1].el);
+    else paintClock(period - elapsed);
   }
   document.addEventListener("visibilitychange", () => { previous = performance.now(); });
   window.setInterval(tick, 100);
