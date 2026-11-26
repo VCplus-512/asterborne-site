@@ -24,3 +24,44 @@ header { position: fixed; background-color: rgb(22 19 35 / 85%); }
 .story-part { margin: 1.1rem 0; }
 .story-label { display: block; font-size: .83rem; letter-spacing: .08em; color: #e6cbb2; }
 .story-part > p { margin: .32rem 0 .65rem; }
+
+#journalDeck {
+  --step: 8px;
+  position: relative;
+  isolation: isolate;
+  margin: calc(2 * var(--step)) calc(2 * var(--step)) 0 0;
+  height: 292px;
+}
+#journalDeck .feature {
+  position: absolute;
+  inset: 0;
+  box-sizing: border-box;
+  border: 1px solid #655968;
+  transition: transform .72s ease, opacity .72s ease;
+}
+#journalDeck .feature > * { min-width: 0; }
+#journalDeck .feature[inert] > * { visibility: hidden; }
+#journalDeck .feature[data-slot="leaving"] > * { visibility: visible; }
+#journalDeck [data-slot="0"] { z-index: 3; opacity: 1; }
+#journalDeck [data-slot="1"] { transform: translate(var(--step),calc(-1 * var(--step))); z-index: 2; opacity: .8; }
+#journalDeck [data-slot="2"] { transform: translate(calc(2 * var(--step)),calc(-2 * var(--step))); z-index: 1; opacity: .6; }
+#journalDeck [data-slot="incoming"] { transform: translate(calc(4 * var(--step)),calc(-4 * var(--step))); z-index: 0; opacity: 0; }
+#journalDeck [data-slot="leaving"] { transform: translate(-25px,22px); z-index: 4; opacity: 0; pointer-events: none; }
+#journalDeck .text-only { display: flex; align-items: center; justify-content: flex-start; text-align: left; }
+#journalDeck .text-only p { max-width: 64ch; }
+#journalDeck h3, #journalDeck p {
+  display: -webkit-box; -webkit-box-orient: vertical; overflow: hidden;
+}
+#journalDeck h3 { -webkit-line-clamp: 2; }
+#journalDeck p { -webkit-line-clamp: 3; }
+@media(max-width:750px) {
+  #journalDeck { --step: 5px; height: 398px; }
+  #journalDeck .feature { display: flex; flex-direction: column; align-items: stretch; justify-content: center; gap: 0; }
+  #journalDeck .featureImg { flex: 0 0 128px; margin-bottom: 10px; }
+  #journalDeck h3 { font-size: 23px; line-height: 1.3; }
+  #journalDeck p { margin: 6px 0 10px; }
+}
+@media(prefers-reduced-motion:reduce) {
+  #journalDeck .feature { transition: none; }
+  #journalDeck [data-slot="leaving"] { visibility: hidden; }
+}

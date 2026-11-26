@@ -25,9 +25,76 @@ function openNote(note) {
   $("article").scrollTop = 0;
 }
 $("order").onchange=render;
-const featuredNote = notes.find(n => n.title === "基地门框的竖缝");
-renderNoteTitle($("featuredTitle"), featuredNote);
-$("readDoor").onclick = () => openNote(featuredNote);
+function startJournalDeck(deck, entries) {
+  if (!entries.length) return;
+  let bag = [];
+  const visible = [];
+  function draw() {
+    if (!bag.length) {
+      bag = entries.slice();
+      for (let i = bag.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [bag[i], bag[j]] = [bag[j], bag[i]];
+      }
+    }
+    const eligible = bag.findIndex(note => !visible.some(card => card.note === note));
+    return bag.splice(eligible < 0 ? 0 : eligible, 1)[0];
+  }
+  function createCard(note) {
+    const el = document.createElement("article");
+    el.className = "feature";
+    const figures = noteFigures(note);
+    if (figures.length) {
+      const figure = figures[Math.floor(Math.random() * figures.length)];
+      const frame = document.createElement("div");
+      frame.className = "featureImg";
+      const img = new Image();
+      img.alt = figure.caption;
+      img.src = "media/" + figure.image;
+      frame.append(img);
+      el.append(frame);
+    } else {
+      el.classList.add("text-only");
+    }
+    const copy = document.createElement("div");
+    const meta = document.createElement("small");
+    meta.textContent = note.tags.join(" / ") + "　／　" + note.date.replaceAll("-", ".");
+    const title = renderNoteTitle(document.createElement("h3"), note);
+    const excerpt = document.createElement("p");
+    excerpt.textContent = note.story.goal;
+    const read = document.createElement("button");
+    read.textContent = "阅读手记　＋";
+    read.onclick = () => openNote(note);
+    copy.append(meta, title, excerpt, read);
+    el.append(copy);
+    deck.append(el);
+    return {note, el};
+  }
+  function positionCards() {
+    visible.forEach(({el}, index) => {
+      el.dataset.slot = index;
+      el.inert = index !== 0;
+    });
+  }
+  while (visible.length < Math.min(3, entries.length)) visible.push(createCard(draw()));
+  positionCards();
+  if (entries.length < 2) return;
+  window.setInterval(() => {
+    if (document.hidden || document.querySelector("dialog[open]") || deck.querySelector(":focus-visible")) return;
+    const next = draw();
+    const leaving = visible.shift().el;
+    leaving.inert = true;
+    leaving.dataset.slot = "leaving";
+    const incoming = createCard(next);
+    incoming.el.dataset.slot = "incoming";
+    incoming.el.inert = true;
+    visible.push(incoming);
+    incoming.el.getBoundingClientRect();
+    positionCards();
+    window.setTimeout(() => leaving.remove(), 850);
+  }, 20000);
+}
+startJournalDeck($("journalDeck"), notes);
 render();
 const sea=$("sea"),film=$("cinema").querySelector("video");
 const updateMotion=()=>{$("motion").textContent=sea.paused?"播放背景":"暂停背景"};sea.onplay=updateMotion;sea.onpause=updateMotion;
