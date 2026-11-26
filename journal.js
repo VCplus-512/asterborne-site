@@ -79,8 +79,7 @@ function startJournalDeck(deck, entries) {
   while (visible.length < Math.min(3, entries.length)) visible.push(createCard(draw()));
   positionCards();
   if (entries.length < 2) return;
-  window.setInterval(() => {
-    if (document.hidden || document.querySelector("dialog[open]") || deck.querySelector(":focus-visible")) return;
+  function rotate() {
     const next = draw();
     const leaving = visible.shift().el;
     leaving.inert = true;
@@ -92,7 +91,36 @@ function startJournalDeck(deck, entries) {
     incoming.el.getBoundingClientRect();
     positionCards();
     window.setTimeout(() => leaving.remove(), 850);
-  }, 20000);
+  }
+  const clock = deck.querySelector(".deck-clock");
+  const ring = clock.querySelector(".clock-ring");
+  const digits = clock.querySelector("text");
+  const period = 20000;
+  let elapsed = 0;
+  let previous = performance.now();
+  let transitioning = false;
+  clock.removeAttribute("hidden");
+
+  function tick() {
+    const now = performance.now();
+    const delta = now - previous;
+    previous = now;
+    if (document.hidden || document.querySelector("dialog[open]") || deck.querySelector(":focus-visible")) return;
+    elapsed += delta;
+    if (elapsed >= period) {
+      elapsed %= period;
+      rotate();
+      transitioning = true;
+    }
+    if (elapsed >= 720) transitioning = false;
+    const remaining = transitioning ? 0 : period - elapsed;
+    // The incoming card starts at 20 after the outgoing card has faded.
+    const seconds = transitioning ? 0 : Math.ceil(remaining / 1000);
+    if (digits.textContent !== String(seconds)) digits.textContent = String(seconds);
+    ring.style.strokeDashoffset = String(100 * (1 - remaining / period));
+  }
+  document.addEventListener("visibilitychange", () => { previous = performance.now(); });
+  window.setInterval(tick, 100);
 }
 startJournalDeck($("journalDeck"), notes);
 render();

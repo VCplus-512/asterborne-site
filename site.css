@@ -37,7 +37,9 @@ header { position: fixed; background-color: rgb(22 19 35 / 85%); }
   position: absolute;
   inset: 0;
   box-sizing: border-box;
-  border: 1px solid #655968;
+  border: 1px solid transparent;
+  background: linear-gradient(105deg,#222631,#302b38) padding-box,
+    linear-gradient(118deg,#b79462,#f0d8a5 17%,#816948 44%,#a98b63 76%,#e1c18e) border-box;
   transition: transform .72s ease, opacity .72s ease;
 }
 #journalDeck .feature > * { min-width: 0; }
@@ -65,4 +67,16 @@ header { position: fixed; background-color: rgb(22 19 35 / 85%); }
 @media(prefers-reduced-motion:reduce) {
   #journalDeck .feature { transition: none; }
   #journalDeck [data-slot="leaving"] { visibility: hidden; }
+}
+
+.deck-clock { position:absolute; z-index:5; right:10px; bottom:10px; width:36px; height:36px; pointer-events:none; }
+.deck-clock[hidden] { display:none; }
+.deck-clock circle { fill:none; stroke-width:1.1; }
+.clock-track { stroke:rgb(255 255 255 / 18%); }
+.clock-ring { stroke:#fff; }
+.deck-clock text { fill:#fff; font:500 15px Arial,sans-serif; font-variant-numeric:tabular-nums; }
+#journalDeck .feature { padding-right:52px; }
+@media(max-width:750px) {
+  #journalDeck .feature { padding-right:14px; padding-bottom:44px; }
+  .deck-clock { right:8px; bottom:6px; width:32px; height:32px; }
 }
