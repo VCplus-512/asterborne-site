@@ -2,3 +2,16 @@
 
 .history-layout .story-part > p { line-height: 1.85; margin: .32rem 0 .65rem; }
 @media(min-width:751px){.history details > .story-part { margin-inline-start:64px; }}
+
+.history-wordmarks {
+  display: flex;
+  align-items: center;
+  gap: .12em;
+  margin-bottom: .15em;
+}
+.history-wordmarks img { display: block; height: 1em; width: auto; }
+.history-wordmarks img + img { height: .5em; }
+.history-title-line { display: block; }
+@media (max-width: 360px) {
+  .history-intro h1 { font-size: 9vw; }
+}
