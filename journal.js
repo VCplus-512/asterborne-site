@@ -2,6 +2,7 @@ const categories=["全部","美术","风格","关卡","机制","设定","UI","�
 const $=id=>document.getElementById(id);
 let active="全部";
 let filteredNotes = [];
+const initialEntryCount = 5;
 function render(){
   $("filters").replaceChildren();
   categories.forEach(tag=>{
@@ -13,7 +14,7 @@ function render(){
   $("listTitle").textContent=active==="全部"?"全部进度":active+"进度";
   filteredNotes=notes.filter(n=>active==="全部"||n.tags.includes(active)).sort((a,b)=> $("order").value==="new"?b.date.localeCompare(a.date):a.date.localeCompare(b.date));
   $("entries").replaceChildren();
-  appendEntries(5);
+  appendEntries(initialEntryCount);
 }
 function appendEntries(count) {
   const list = $("entries");
@@ -44,6 +45,23 @@ $("moreEntries").onclick = () => {
   appendEntries(10);
   list.children[start]?.focus({preventScroll:true});
 };
+let lastListScrollY = window.scrollY;
+window.addEventListener("scroll", () => {
+  const y = Math.max(0, window.scrollY);
+  const movingUp = y < lastListScrollY;
+  lastListScrollY = y;
+  const list = $("entries");
+  if (!movingUp || list.childElementCount <= initialEntryCount) return;
+  // Read row positions before removing any, so layout is measured only once.
+  let keep = list.childElementCount;
+  while (keep > initialEntryCount && (y === 0 || list.children[keep - 1].getBoundingClientRect().top >= window.innerHeight)) {
+    keep--;
+  }
+  if (keep === list.childElementCount) return;
+  while (list.childElementCount > keep) list.lastElementChild.remove();
+  $("moreEntries").hidden = false;
+}, {passive:true});
+
 function openNote(note) {
   $("articleMeta").textContent = note.date + "　/　" + note.tags.join(" · ");
   renderNoteTitle($("articleTitle"), note);
