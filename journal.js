@@ -1,6 +1,7 @@
 const categories=["全部","美术","风格","关卡","机制","设定","UI","影音","性能","制作"];
 const $=id=>document.getElementById(id);
 let active="全部";
+let filteredNotes = [];
 function render(){
   $("filters").replaceChildren();
   categories.forEach(tag=>{
@@ -10,10 +11,39 @@ function render(){
     b.setAttribute("aria-pressed",String(active===tag));b.onclick=()=>{active=tag;render();$("filters").querySelector('[aria-pressed="true"]').focus({preventScroll:true})};$("filters").append(b);
   });
   $("listTitle").textContent=active==="全部"?"全部进度":active+"进度";
-  const rows=notes.filter(n=>active==="全部"||n.tags.includes(active)).sort((a,b)=> $("order").value==="new"?b.date.localeCompare(a.date):a.date.localeCompare(b.date));
+  filteredNotes=notes.filter(n=>active==="全部"||n.tags.includes(active)).sort((a,b)=> $("order").value==="new"?b.date.localeCompare(a.date):a.date.localeCompare(b.date));
   $("entries").replaceChildren();
-  rows.forEach(n=>{const b=document.createElement("button");b.className="entry";const t=document.createElement("time");t.dateTime=n.date;t.textContent=n.date.replaceAll("-",".");const desc=document.createElement("span");const title=document.createElement("b");renderNoteTitle(title,n);const tags=document.createElement("small");tags.textContent=n.tags.join("　/　");desc.append(title,tags);const plus=document.createElement("i");plus.textContent="＋";plus.setAttribute("aria-hidden","true");b.append(t,desc,plus);b.onclick=()=>openNote(n);$("entries").append(b)});
+  appendEntries(5);
 }
+function appendEntries(count) {
+  const list = $("entries");
+  const start = list.childElementCount;
+  for (const note of filteredNotes.slice(start, start + count)) {
+    const button = document.createElement("button");
+    button.className = "entry";
+    const date = document.createElement("time");
+    date.dateTime = note.date;
+    date.textContent = note.date.replaceAll("-", ".");
+    const description = document.createElement("span");
+    const title = renderNoteTitle(document.createElement("b"), note);
+    const tags = document.createElement("small");
+    tags.textContent = note.tags.join("　/　");
+    description.append(title, tags);
+    const plus = document.createElement("i");
+    plus.textContent = "＋";
+    plus.setAttribute("aria-hidden", "true");
+    button.append(date, description, plus);
+    button.onclick = () => openNote(note);
+    list.append(button);
+  }
+  $("moreEntries").hidden = list.childElementCount >= filteredNotes.length;
+}
+$("moreEntries").onclick = () => {
+  const list = $("entries");
+  const start = list.childElementCount;
+  appendEntries(10);
+  list.children[start]?.focus({preventScroll:true});
+};
 function openNote(note) {
   $("articleMeta").textContent = note.date + "　/　" + note.tags.join(" · ");
   renderNoteTitle($("articleTitle"), note);

@@ -100,3 +100,13 @@ header { position: fixed; background-color: rgb(22 19 35 / 85%); }
 #journalDeck :is([data-slot="1"], [data-slot="2"])[data-peek="corner"] { translate: calc(2 * var(--step)) calc(-2 * var(--step)); }
 
 #journalDeck.chain-flight .feature { transition-timing-function: linear, linear, ease-out; }
+
+#moreEntries {
+  display: block;
+  margin: 20px auto 0;
+  padding: .6em 1.8em;
+  border: 1px solid #ab906b;
+  color: #ecd2ae;
+}
+#moreEntries[hidden] { display: none; }
+#moreEntries:hover, #moreEntries:focus-visible { background: #d7b89b18; }
