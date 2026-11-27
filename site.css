@@ -110,3 +110,14 @@ header { position: fixed; background-color: rgb(22 19 35 / 85%); }
 }
 #moreEntries[hidden] { display: none; }
 #moreEntries:hover, #moreEntries:focus-visible { background: #d7b89b18; }
+
+header nav { align-items: center; white-space: nowrap; }
+header nav [aria-current="page"] { color: #f1d5a3; }
+header nav [aria-disabled="true"] { color: #b9b2bd; }
+.journal-page .archive { max-width: 1280px; margin: 0 auto; padding: 44px 4% 68px; }
+@media (max-width: 620px) {
+  header { flex-direction: column; gap: 6px; padding: 7px 3%; }
+  header nav { width: 100%; justify-content: space-evenly; gap: 4px; font-size: 12px; }
+  body.history main { padding-top: 60px; }
+  .journal-page .archive { padding: 24px 5% 48px; }
+}
