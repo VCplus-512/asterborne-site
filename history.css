@@ -5,12 +5,13 @@
 
 .history-wordmarks {
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   gap: .12em;
   margin-bottom: .15em;
 }
 .history-wordmarks img { display: block; height: 1em; width: auto; }
-.history-wordmarks img + img { height: .5em; }
+/* Match the visible baseline across the two PNGs’ transparent bottom margins. */
+.history-wordmarks img + img { height: .5em; transform: translateY(-4.7%); }
 .history-title-line { display: block; }
 @media (max-width: 360px) {
   .history-intro h1 { font-size: 9vw; }
